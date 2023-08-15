@@ -60,7 +60,7 @@ public class JwtTokenProvider {
         return token;
     }
 
-    public String getUsername(String token) {
+    public String getUid(String token) {
         LOGGER.info("[*JwtTokenProvider] getUsername()");
         String info = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
         LOGGER.info("[JwtTokenProvider*] getUsername(); info : {}", info);
@@ -69,7 +69,7 @@ public class JwtTokenProvider {
 
     public Authentication getAuthentication(String token) {
         LOGGER.info("[*JwtTokenProvider] getAuthentication()");
-        UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUsername(token));
+        UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUid(token));
         LOGGER.info("[JwtTokenProvider*] getAuthentication(); UserDetails UserName : {}", userDetails.getUsername());
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }

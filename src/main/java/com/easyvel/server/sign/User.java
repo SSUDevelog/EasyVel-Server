@@ -3,9 +3,7 @@ package com.easyvel.server.sign;
 import com.easyvel.server.notification.Notification;
 import com.easyvel.server.subscribe.Subscribe;
 import com.easyvel.server.tag.Tag;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,7 +16,9 @@ import java.util.stream.Collectors;
 
 @Entity
 @Getter @Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
