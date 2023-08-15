@@ -44,6 +44,10 @@ jobs:
       - name: make application.yml 파일 생성
         run: |
           ## create application.yml
+
+          ## 이미 추적되는 파일 경로 삭제
+          rm -rf ./src/main/resources
+          
           mkdir ./src/main/resources
           cd ./src/main/resources
           
