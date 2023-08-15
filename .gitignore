@@ -34,6 +34,6 @@ out/
 /.nb-gradle/
 
 ### setting files ###
-*.yaml
-*.yml
-*.properties
+application.yaml
+application.yml
+application.properties
