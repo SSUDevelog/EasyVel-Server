@@ -20,10 +20,10 @@ public class SwaggerConfiguration {
     @Value("${swagger.basepackage}")
     private String basepackage;
 
-    @Value("${swagger.title}")
+    @Value("${swagger.ui.title}")
     private String title;
 
-    @Value("${swagger.description}")
+    @Value("${swagger.ui.description}")
     private String description;
 
     @Bean
