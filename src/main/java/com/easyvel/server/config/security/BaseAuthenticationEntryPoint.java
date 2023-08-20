@@ -1,6 +1,6 @@
 package com.easyvel.server.config.security;
 
-import com.easyvel.server.config.security.dto.EntryPointErrorResponse;
+import com.easyvel.server.global.dto.DefaultResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +24,8 @@ public class BaseAuthenticationEntryPoint implements AuthenticationEntryPoint {
         ObjectMapper objectMapper = new ObjectMapper();
         LOGGER.info("[commence] 인증 실패로 response.sendError 발생");
 
-        EntryPointErrorResponse entryPointErrorResponse = new EntryPointErrorResponse();
-        entryPointErrorResponse.setMsg("인증이 실패하였습니다.");
 
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        response.setContentType("application/json");
-        response.setCharacterEncoding("utf-8");
-        response.getWriter().write(objectMapper.writeValueAsString(entryPointErrorResponse));
+        DefaultResponse defaultResponse = new DefaultResponse("인증이 실패하였습니다.");
+        defaultResponse.setResponse(response, HttpStatus.UNAUTHORIZED);
     }
 }

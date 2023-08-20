@@ -30,7 +30,7 @@ public class SignController {
     public String refreshToken(@RequestHeader(SecurityConfiguration.TOKEN_HEADER) String token) throws SignException {
         String uid = jwtTokenProvider.getUid(token);
 
-        return signService.makeToken(uid);
+        return signService.makeTokenByUid(uid);
     }
 
     /**

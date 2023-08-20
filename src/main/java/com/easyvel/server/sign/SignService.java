@@ -104,7 +104,7 @@ public class SignService {
         userRepository.delete(user);
     }
 
-    public String makeToken(String uid) throws SignException {
+    public String makeTokenByUid(String uid) throws SignException {
         Optional<User> optionalUser = userRepository.getByUid(uid);
 
         if(optionalUser.isEmpty())
