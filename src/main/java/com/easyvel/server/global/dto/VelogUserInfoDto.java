@@ -1,4 +1,4 @@
-package com.easyvel.server.subscribe.dto;
+package com.easyvel.server.global.dto;
 
 import lombok.*;
 

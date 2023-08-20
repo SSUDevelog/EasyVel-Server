@@ -1,5 +1,6 @@
 package com.easyvel.server.subscribe.dto;
 
+import com.easyvel.server.global.dto.PostDto;
 import lombok.Data;
 import lombok.ToString;
 

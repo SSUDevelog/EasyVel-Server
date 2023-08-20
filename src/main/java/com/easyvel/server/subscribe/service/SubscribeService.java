@@ -1,5 +1,7 @@
 package com.easyvel.server.subscribe.service;
 
+import com.easyvel.server.global.dto.PostDto;
+import com.easyvel.server.global.dto.VelogUserInfoDto;
 import com.easyvel.server.global.entity.Subscribe;
 import com.easyvel.server.global.entity.Target;
 import com.easyvel.server.global.entity.User;

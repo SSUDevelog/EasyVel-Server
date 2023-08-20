@@ -1,5 +1,6 @@
 package com.easyvel.server.subscribe;
 
+import com.easyvel.server.global.dto.VelogUserInfoDto;
 import com.easyvel.server.subscribe.dto.*;
 import com.easyvel.server.subscribe.service.SubscribeService;
 import org.slf4j.Logger;
@@ -15,17 +16,17 @@ import java.util.List;
 @RequestMapping("subscribe")
 public class SubscribeController {
 
-    // 현재 구현체가 없어서 주석처리 해두었습니다.
-    //private final JwtTokenProvider jwtTokenProvider;
+//     현재 구현체가 없어서 주석처리 해두었습니다.
+//    private final JwtTokenProvider jwtTokenProvider;
 
     private final SubscribeService subscribeService;
 
-    //알림은 현재 사용하지 않으며, 구현체가 없어서 주석처리합니다.
-    //private final NotificationService notificationService;
+//    알림은 현재 사용하지 않으며, 구현체가 없어서 주석처리합니다.
+//    private final NotificationService notificationService;
 
     private final Logger LOGGER = LoggerFactory.getLogger(SubscribeController.class.getSimpleName());
 
-    //상기 구현체 이유로 주석처리 합니다.
+//    상기 구현체 이유로 주석처리 합니다.
 //    public SubscribeController(JwtTokenProvider jwtTokenProvider, SubscribeService subscribeService, NotificationService notificationService) {
 //        this.jwtTokenProvider = jwtTokenProvider;
 //        this.subscribeService = subscribeService;
@@ -37,9 +38,9 @@ public class SubscribeController {
         this.subscribeService = subscribeService;
     }
 
-    // 스웨거 설정이 없어서 관련 annotation은 임시로 주석처리 합니다.
-    //@ApiImplicitParams({
-    //      @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "로그인 성공 후 발급 받은 access_token", required = true, dataType = "String", paramType = "header")})
+//    스웨거 설정이 없어서 관련 annotation은 임시로 주석처리 합니다.
+//    @ApiImplicitParams({
+//          @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "로그인 성공 후 발급 받은 access_token", required = true, dataType = "String", paramType = "header")})
     @GetMapping(value = "/getsubscriber")
     public ResponseEntity<List<VelogUserInfoDto>> getSubscriber(@RequestHeader("X-AUTH-TOKEN") String token) throws IOException {//제네릭 안의 제네릭 -> 별도응답 객체를 만들어야함!
         // 해당 유저가 구독한 대상 리스트를 불러오는 GET api 입니다.
@@ -55,7 +56,7 @@ public class SubscribeController {
         return ResponseEntity.status(HttpStatus.OK).body(subscribers);
     }
 
-    // 스웨거 설정이 없어서 관련 annotation은 임시로 주석처리 합니다.
+//    스웨거 설정이 없어서 관련 annotation은 임시로 주석처리 합니다.
 //    @ApiImplicitParams({
 //            @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "로그인 성공 후 발급 받은 access_token", required = true, dataType = "String", paramType = "header")})
     @PostMapping(value = "/addsubscriber")
@@ -72,7 +73,7 @@ public class SubscribeController {
         return ResponseEntity.status(HttpStatus.OK).body("Success");//임시
     }
 
-    // 스웨거 설정이 없어서 관련 annotation은 임시로 주석처리 합니다.
+//    스웨거 설정이 없어서 관련 annotation은 임시로 주석처리 합니다.
 //    @ApiImplicitParams({
 //            @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "로그인 성공 후 발급 받은 access_token", required = true, dataType = "String", paramType = "header")})
     @GetMapping(value = "/subscriberpost")//responseentity가 없어도 되는지 테스트 되는지 확인해보기//403 402같은 코드를 던질경우 쓰기
@@ -88,7 +89,7 @@ public class SubscribeController {
         return ResponseEntity.status(HttpStatus.OK).body(subscriberPostsDto);
     }
 
-    // 스웨거 설정이 없어서 관련 annotation은 임시로 주석처리 합니다.
+//    스웨거 설정이 없어서 관련 annotation은 임시로 주석처리 합니다.
 //    @ApiImplicitParams({
 //            @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "로그인 성공 후 발급 받은 access_token", required = true, dataType = "String", paramType = "header")})
     @GetMapping("/validate/{name}")
@@ -132,7 +133,7 @@ public class SubscribeController {
 
     }
 
-    // 스웨거 설정이 없어서 관련 annotation은 임시로 주석처리 합니다.
+//    스웨거 설정이 없어서 관련 annotation은 임시로 주석처리 합니다.
 //    @ApiImplicitParams({
 //            @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "로그인 성공 후 발급 받은 access_token", required = true, dataType = "String", paramType = "header")})
     @GetMapping("/usermain/{name}")
