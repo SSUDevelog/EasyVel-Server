@@ -118,7 +118,7 @@ public class SubscribeController {
 
     @GetMapping("/trendposts")
     @ResponseBody
-    public ResponseEntity<TrendResultDto> trendPosts(@RequestHeader("X-AUTH-TOKEN") String token){
+    public ResponseEntity<TrendResultDto> trendPosts(@RequestHeader("X-AUTH-TOKEN") String token) throws IOException {
         // Velog 메인에서 제공하는 실시간 트렌드 포스트들을 리턴합니다.
         // throw에 SubscribeException 추가해야 합니다.
 
@@ -128,7 +128,7 @@ public class SubscribeController {
             TrendResultDto trendResultDto = subscribeService.collectTrendPost(userName);
             return ResponseEntity.status(HttpStatus.OK).body(trendResultDto);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IOException(e);
         }
 
     }

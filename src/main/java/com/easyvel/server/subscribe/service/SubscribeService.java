@@ -7,39 +7,33 @@ import com.easyvel.server.global.entity.Target;
 import com.easyvel.server.global.entity.User;
 import com.easyvel.server.subscribe.dto.*;
 import com.easyvel.server.global.repository.SubscribeRepository;
-import com.easyvel.server.global.repository.TagRepository;
 import com.easyvel.server.global.repository.TargetRepository;
 import com.easyvel.server.global.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.jsoup.nodes.Element;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class SubscribeService {
 
-    SubscribeRepository subscribeRepository;
-    UserRepository userRepository;
-    TargetRepository targetRepository;
+    private final SubscribeRepository subscribeRepository;
+    private final UserRepository userRepository;
+    private final TargetRepository targetRepository;
     // private final TagRepository tagRepository;
 
-    @Autowired
-    public SubscribeService(SubscribeRepository subscribeRepository, UserRepository userRepository, TargetRepository targetRepository,
-                            TagRepository tagRepository) {
-        this.subscribeRepository = subscribeRepository;
-        this.userRepository = userRepository;
-        this.targetRepository = targetRepository;
-        //this.tagRepository = tagRepository; 임시로 주석처리하며, 파라미터에서 제외합니다.
-    }
 
     public UserMainDto getUserMain(String name) {
         // Velog 유저의 프로필 url을 담은 dto를 리턴합니다.
@@ -50,9 +44,10 @@ public class SubscribeService {
         // 유저가 구독하고 있는 velog 유저들의 게시물들을 리턴합니다.
         // throws에 SubscribeException 추가해야 합니다.
 
-        User user = userRepository.getByUid(uid);//밖으로 빼야함.
+        Optional<User> user = userRepository.getByUid(uid);//밖으로 빼야함.
+        User resultUser = user.orElseThrow(() -> new IOException()); // 커스텀 에러로 변경 고려
 
-        List<VelogUserInfoDto> subscribers = getSubscribers(user); //subscriber 이름 다시 생각
+        List<VelogUserInfoDto> subscribers = getSubscribers(resultUser); //subscriber 이름 다시 생각
         List<String> names = new ArrayList<>();
 
         for (VelogUserInfoDto velogUserInfoDto : subscribers) {
@@ -95,9 +90,10 @@ public class SubscribeService {
         // 구독관계 추가를 위해 user와 target의 이름을 맵핑하는 객체를 생성합니다.
         // throws에 SubscribeException 추가해야 합니다.
 
-        User user = userRepository.getByUid(uid);
+        Optional<User> user = userRepository.getByUid(uid);
+        User resultUser = user.orElseThrow(() -> new IOException()); // 추후 커스텀 에러로 변경 고려
 
-        List<VelogUserInfoDto> velogUserInfoDtos = getSubscribers(user);
+        List<VelogUserInfoDto> velogUserInfoDtos = getSubscribers(resultUser);
         List<String> names = new ArrayList<>();
 
         for (VelogUserInfoDto subs : velogUserInfoDtos) {
@@ -109,15 +105,16 @@ public class SubscribeService {
 //            throw new SubscribeException(HttpStatus.BAD_REQUEST, "이미 추가한 구독대상입니다.");
 //        }
 
-        makeSubscribe(user, subscriber);
+        makeSubscribe(resultUser, subscriber);
     }
 
     //
     public List<VelogUserInfoDto> getSubscribers(String userName) throws IOException {
         // 유저 네임을 통해 User 객체를 얻고, 구독자 조회 메소드를 호출합니다.
-        User user = userRepository.getByUid(userName);
+        Optional<User> user = userRepository.getByUid(userName);
+        User resultUser = user.orElseThrow(() -> new IOException()); // 커스텀 에러로 변경 고려
 
-        return getSubscribers(user);
+        return getSubscribers(resultUser);
     }
 
     public List<PostDto> getSubscriberPosts(String subscriber) throws IOException {
@@ -126,10 +123,112 @@ public class SubscribeService {
         String userProfileURL = "https://velog.io/@" + subscriber;
         Document doc = Jsoup.connect(userProfileURL).get();
 
-        List<PostDto> subscribePostDtos = new ArrayList<>();
-
         Elements posts = doc.select("#root > div > div > div > div > div").get(6).select("> div");
 
+        return doSubscribeScrapping(posts, subscriber);
+    }
+
+    public ValidateVelogUserDto getVelogUserProfile(Boolean isPresent, ValidateVelogUserDto validateVelogUserDto) throws IOException {
+        // 실제 존재하는 velog 유저라면 프로필 사진 url을 추가하는 함수를 호출하고, 아니라면 바로 리턴합니다.
+        if (isPresent == Boolean.FALSE) {
+            validateVelogUserDto.setValidate(Boolean.FALSE);
+            return validateVelogUserDto;
+        }
+        validateVelogUserDto.setValidate(Boolean.TRUE);
+        getVelogUserProfilePicture(validateVelogUserDto);
+        return validateVelogUserDto;
+    }
+
+    public UnsubscribeDto deleteSubscribe(String userName, String targetName) {
+        // EasyVel 유저(User)와 Velog 유저(Target)간의 구독 관계를 삭제합니다.
+        UnsubscribeDto unsubscribeDto = new UnsubscribeDto();
+        Optional<User> user = userRepository.getByUid(userName);//밖으로 빼야함.
+        User resultUser = user.orElseThrow(() -> new RuntimeException()); // 커스텀 에러로 변경 고려
+
+        Optional<Target> target= targetRepository.getByVelogUserName(targetName);
+        Target resultTarget = target.orElseThrow(() -> new RuntimeException()); // 추후 custom exception 처리
+
+        Optional<Subscribe> subscribe = subscribeRepository.getByUserAndTarget(resultUser, resultTarget);
+        Subscribe resultSubscribe = subscribe.orElseThrow(() -> new RuntimeException()); // 추후 custom exception 처리
+
+        subscribeRepository.delete(resultSubscribe);
+        unsubscribeDto.setSuccess(Boolean.TRUE);
+        unsubscribeDto.setMsg("구독을 취소했습니다.");
+        return unsubscribeDto;
+    }
+
+    public void validateTarget(String targetName) {
+        // 구독 삭제가 일어남으로써, 아무도 해당 Velog 유저를 구독하지 않는다면 그 Velog 유저의 정보를 삭제합니다.
+        Optional<Target> target= targetRepository.getByVelogUserName(targetName);
+        Target result = target.orElseThrow(() -> new RuntimeException());
+
+        if (result.getSubscribes().isEmpty()) {
+            targetRepository.delete(result);
+        }
+    }
+
+
+    public TrendResultDto collectTrendPost(String uid) throws IOException {
+        // 트렌드 포스트의 정보들을 스크래핑하여 저장합니다.
+        // throws에 SubscribeException 추가해야 합니다.
+
+        String url = "https://velog.io";
+
+        Document doc = Jsoup.connect(url).get();
+
+        Elements posts = doc.select("#root > div > div > div > main > div > div");
+
+        List<PostDto> trendposts = doTrendPostScrapping(posts, url);
+
+        return checkSubscribeOfTrend(trendposts, uid);
+
+    }
+
+    private List<PostDto> doTrendPostScrapping(Elements posts, String url) {
+
+        List<PostDto> trendposts = new ArrayList<>();
+
+        for (Element post : posts) {
+            PostDto postDto = new PostDto();
+            postDto.setTitle(post.select("a h4").text());
+            postDto.setImg(post.select("img").attr("src"));
+            postDto.setUrl(url + post.select("a").attr("href"));
+            postDto.setSummary(post.select("p").text());
+            postDto.setName(post.select("a.userinfo").attr("href").substring(2));
+            postDto.setDate(post.select("div.sub-info > span").first().text());
+            postDto.setLike(Integer.parseInt(post.select("div.likes").text()));
+            postDto.setComment(Integer.parseInt(post.select("div.sub-info > span").last().text().replace("개의 댓글", "")));
+
+            trendposts.add(postDto);
+        }
+
+        return trendposts;
+    }
+
+    private TrendResultDto checkSubscribeOfTrend(List<PostDto> trendposts, String uid) throws IOException {
+
+        TrendResultDto trendResultDto = new TrendResultDto();
+
+        List<VelogUserInfoDto> subscribers = getSubscribers(uid);
+        List<String> subNames = new ArrayList<>();
+
+        if (subscribers == null) {
+            return trendResultDto;
+        }
+
+        for (VelogUserInfoDto velogUserInfoDto : subscribers) {
+            subNames.add(velogUserInfoDto.getName());
+        }
+
+        for (PostDto postDto : trendposts) {
+            postDto.setSubscribed(subNames.contains(postDto.getName()));
+        }
+
+        return trendResultDto;
+    }
+
+    private List<PostDto> doSubscribeScrapping(Elements posts, String subscriber) {
+        List<PostDto> subscribePostDtos = new ArrayList<>();
         for (Element post : posts) {
             try {
                 PostDto postDto = new PostDto();
@@ -153,7 +252,6 @@ public class SubscribeService {
                 return subscribePostDtos;
             }
         }
-
         return subscribePostDtos;
     }
 
@@ -164,81 +262,6 @@ public class SubscribeService {
 
         if (responseCode == 404) return Boolean.FALSE;
         return Boolean.TRUE;
-    }
-
-    public ValidateVelogUserDto getVelogUserProfile(Boolean isPresent, ValidateVelogUserDto validateVelogUserDto) throws IOException {
-        // 실제 존재하는 velog 유저라면 프로필 사진 url을 추가하는 함수를 호출하고, 아니라면 바로 리턴합니다.
-        if (isPresent == Boolean.FALSE) {
-            validateVelogUserDto.setValidate(Boolean.FALSE);
-            return validateVelogUserDto;
-        }
-        validateVelogUserDto.setValidate(Boolean.TRUE);
-        getVelogUserProfilePicture(validateVelogUserDto);
-        return validateVelogUserDto;
-    }
-
-    public UnsubscribeDto deleteSubscribe(String userName, String targetName) {
-        // EasyVel 유저(User)와 Velog 유저(Target)간의 구독 관계를 삭제합니다.
-        UnsubscribeDto unsubscribeDto = new UnsubscribeDto();
-        User user = userRepository.getByUid(userName);
-        Target target = targetRepository.getByVelogUserName(targetName);
-        Subscribe subscribe = subscribeRepository.getByUserAndTarget(user, target);
-        subscribeRepository.delete(subscribe);
-        unsubscribeDto.setSuccess(Boolean.TRUE);
-        unsubscribeDto.setMsg("구독을 취소했습니다.");
-        return unsubscribeDto;
-    }
-
-    public void validateTarget(String targetName) {
-        // 구독 삭제가 일어남으로써, 아무도 해당 Velog 유저를 구독하지 않는다면 그 Velog 유저의 정보를 삭제합니다.
-        Target target = targetRepository.getByVelogUserName(targetName);
-        if (target.getSubscribes().isEmpty()) {
-            targetRepository.delete(target);
-        }
-    }
-
-
-    public TrendResultDto collectTrendPost(String uid) throws IOException {
-        // 트렌드 포스트의 정보들을 스크래핑하여 저장합니다.
-        // throws에 SubscribeException 추가해야 합니다.
-
-        String url = "https://velog.io";
-
-        Document doc = Jsoup.connect(url).get();
-
-        TrendResultDto trendResultDto = new TrendResultDto();
-        Elements posts = doc.select("#root > div > div > div > main > div > div");
-
-        for (Element post : posts) {
-            PostDto postDto = new PostDto();
-            postDto.setTitle(post.select("a h4").text());
-            postDto.setImg(post.select("img").attr("src"));
-            postDto.setUrl(url + post.select("a").attr("href"));
-            postDto.setSummary(post.select("p").text());
-            postDto.setName(post.select("a.userinfo").attr("href").substring(2));
-            postDto.setDate(post.select("div.sub-info > span").first().text());
-            postDto.setLike(Integer.parseInt(post.select("div.likes").text()));
-            postDto.setComment(Integer.parseInt(post.select("div.sub-info > span").last().text().replace("개의 댓글", "")));
-
-            trendResultDto.getTrendPostDtos().add(postDto);
-        }
-
-        List<VelogUserInfoDto> subscribers = getSubscribers(uid);
-        List<String> subNames = new ArrayList<>();
-
-        if (subscribers == null) {
-            return trendResultDto;
-        }
-
-        for (VelogUserInfoDto velogUserInfoDto : subscribers) {
-            subNames.add(velogUserInfoDto.getName());
-        }
-
-        for (PostDto postDto : trendResultDto.getTrendPostDtos()) {
-            postDto.setSubscribed(subNames.contains(postDto.getName()));
-        }
-
-        return trendResultDto;
     }
 
     private List<VelogUserInfoDto> getSubscribers(User user) throws IOException {
@@ -281,18 +304,21 @@ public class SubscribeService {
     }
 
     private void makeSubscribe(User user, String subscriber) {
-        // DB에 구독 관계를 기록합니다.
-        Target target = targetRepository.getByVelogUserName(subscriber);
-        if (target == null) {
-            target = new Target();
-            target.setVelogUserName(subscriber);
-            targetRepository.save(target);
-        }
+        // velog 유저 이름으로 target을 찾고, DB에 subscribe를 기록하는 함수를 호출합니다.
+        Optional<Target> target = targetRepository.getByVelogUserName(subscriber);
+        Target result = target.orElseGet(() -> makeNewTarget(subscriber));
 
-        makeSubscribe(user, target);
+        writeSubscribeTable(user, result);
     }
 
-    private void makeSubscribe(User user, Target target) {
+    private Target makeNewTarget(String subscriber) {
+        Target target = new Target();
+        target.setVelogUserName(subscriber);
+        targetRepository.save(target);
+        return target;
+    }
+
+    private void writeSubscribeTable(User user, Target target) {
         // DB에 구독 관계를 기록합니다.
         Subscribe subscribe = new Subscribe();
 
