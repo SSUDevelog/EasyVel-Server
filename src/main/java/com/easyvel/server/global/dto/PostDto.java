@@ -1,16 +1,14 @@
 package com.easyvel.server.global.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-@Data
+@Getter @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
