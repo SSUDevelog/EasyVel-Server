@@ -98,7 +98,7 @@ public class TagService {
         return getTagList(vol, doc);
     }
 
-    private static TagList getTagList(int vol, Document doc) throws IOException {
+    private TagList getTagList(int vol, Document doc) throws IOException {
         List<String> tags = new ArrayList<>();
 
         Elements elementTags = doc.selectXpath("//*[@id=\"root\"]/div[2]/main/section").select("a");
