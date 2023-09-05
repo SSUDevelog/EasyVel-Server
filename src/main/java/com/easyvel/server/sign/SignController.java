@@ -89,8 +89,8 @@ public class SignController {
     }
 
     @EasyvelTokenApiImplicitParams
-    @PostMapping("/sign-out")
-    public void signOut(@RequestHeader("X-AUTH-TOKEN") String token) throws SignException {
+    @DeleteMapping(value = "/sign-out")
+    public void signOut(@RequestHeader(SecurityConfiguration.TOKEN_HEADER) String token) throws SignException {
         String uid = jwtTokenProvider.getUid(token);
         LOGGER.info("[signIn] 회원탈퇴를 시도하고 있습니다. id : {}, pw : ****", uid);
 
