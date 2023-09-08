@@ -1,5 +1,6 @@
 package com.easyvel.server.sign;
 
+import com.easyvel.server.global.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

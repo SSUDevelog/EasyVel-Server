@@ -1,6 +1,7 @@
 package com.easyvel.server.sign;
 
 import com.easyvel.server.exception.SignException;
+import com.easyvel.server.global.entity.User;
 import com.easyvel.server.jwt.JWTParser;
 import com.easyvel.server.jwt.JwtTokenProvider;
 import com.easyvel.server.jwt.dto.ParsedJWT;
