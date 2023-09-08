@@ -71,7 +71,7 @@ public class SubscribeController {
     @GetMapping("/validate/{name}")
     @ResponseBody
     public ResponseEntity<ValidateVelogUserDto> validateUser(@PathVariable String name) throws IOException {
-        // 입력 된 id가 실제 velog에 존재하는 유저인지 확인하는 GET api입니다.
+        // 입력 된 user name이 실제 velog에 존재하는 유저인지 확인하는 GET api입니다.
 
         ValidateVelogUserDto validateVelogUserDto = new ValidateVelogUserDto(name);
         Boolean isPresent = subscribeService.isValidateUser(validateVelogUserDto);

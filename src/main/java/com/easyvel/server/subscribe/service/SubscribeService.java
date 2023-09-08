@@ -16,7 +16,6 @@ import org.jsoup.select.Elements;
 import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -44,7 +43,7 @@ public class SubscribeService {
         // 유저가 구독하고 있는 velog 유저들의 게시물들을 리턴합니다.
         // throws에 SubscribeException 추가해야 합니다.
 
-        Optional<User> user = userRepository.getByUid(uid);//밖으로 빼야함.
+        Optional<User> user = userRepository.getByUid(uid);
         User resultUser = user.orElseThrow(() -> new IOException()); // 커스텀 에러로 변경 고려
 
         List<VelogUserInfoDto> subscribers = getSubscribers(resultUser); //subscriber 이름 다시 생각
@@ -64,7 +63,7 @@ public class SubscribeService {
     }
 
     public SubscriberPostsDto getSubscribersPost(List<String> subscribers) throws IOException {
-        // 함수 설명을 추가하세요.
+        // velog 유저들의 post를 스크래핑합니다.
         // throws에 SubscribeException 추가해야 합니다.
 
         SubscriberPostsDto subscriberPostsDto = new SubscriberPostsDto();
