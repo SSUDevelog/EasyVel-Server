@@ -24,7 +24,7 @@ public class TagController {
 
     @ApiOperation("유저 태그 목록")
     @EasyvelTokenApiImplicitParams
-    @GetMapping
+    @GetMapping("/gettag")
     public TagList getUserTagList(@RequestHeader(SecurityConfiguration.TOKEN_HEADER) String token) {
         String uid = jwtTokenProvider.getUid(token);
 
@@ -33,7 +33,7 @@ public class TagController {
 
     @ApiOperation("유저 태그 추가")
     @EasyvelTokenApiImplicitParams
-    @PostMapping
+    @PostMapping("addtag")
     public void addUserTag(@RequestBody String tag,
             @RequestHeader(SecurityConfiguration.TOKEN_HEADER) String token) {
         String uid = jwtTokenProvider.getUid(token);
@@ -43,7 +43,7 @@ public class TagController {
 
     @ApiOperation("유저 태그 제거")
     @EasyvelTokenApiImplicitParams
-    @DeleteMapping
+    @DeleteMapping("deletetag")
     public void deleteUserTag(@RequestBody String tag,
                               @RequestHeader(SecurityConfiguration.TOKEN_HEADER) String token) {
         String uid = jwtTokenProvider.getUid(token);
@@ -54,7 +54,7 @@ public class TagController {
     //Todo: 페이징 필요
     @ApiOperation("유저 태그 목록 연관 포스트")
     @EasyvelTokenApiImplicitParams
-    @GetMapping("/posts")
+    @GetMapping("/posts-1")
     public List<PostDto> getUserTagPostList(@RequestHeader(SecurityConfiguration.TOKEN_HEADER) String token) throws IOException {
         String uid = jwtTokenProvider.getUid(token);
 
@@ -64,7 +64,7 @@ public class TagController {
     //Todo: 페이징 필요
     @ApiOperation(value = "태그 연관 포스트", notes = "search 파라미터에 검색할 태그를 입력")
     @EasyvelTokenApiImplicitParams
-    @GetMapping("/posts")
+    @GetMapping("/posts-2")
     public List<PostDto> getUserTagPostList(@RequestParam String search,
                                             @RequestHeader(SecurityConfiguration.TOKEN_HEADER) String token) throws IOException {
         String uid = jwtTokenProvider.getUid(token);

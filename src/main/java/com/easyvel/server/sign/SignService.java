@@ -1,6 +1,8 @@
 package com.easyvel.server.sign;
 
 import com.easyvel.server.exception.SignException;
+import com.easyvel.server.global.entity.User;
+import com.easyvel.server.global.repository.UserRepository;
 import com.easyvel.server.jwt.JWTParser;
 import com.easyvel.server.jwt.JwtTokenProvider;
 import com.easyvel.server.jwt.dto.ParsedJWT;
@@ -33,7 +35,7 @@ public class SignService {
         Optional<User> user = userRepository.getByUid(uid);
         return user.isPresent();
     }
-    
+
     //Todo: 임시구현
     public String getGoogleID(String identity_token) throws JsonProcessingException, UnsupportedEncodingException {
         ParsedJWT parsedJWT = JWTParser.getParsedJWT(identity_token);
@@ -47,20 +49,20 @@ public class SignService {
         return "apple_" + parsedJWT.getPayload().get("sub");
     }
 
-    public void signUp(SignUpDto signUpDto) throws SignException{
+    public void signUp(SignUpDto signUpDto) throws SignException {
 
         LOGGER.info("[signUp] 중복 검사");
         Optional<User> optionalUser = userRepository.getByUid(signUpDto.getId());
         if (optionalUser.isPresent())
             throw new SignException(HttpStatus.BAD_REQUEST, "중복된 ID 입니다.");
-        
+
         LOGGER.info("[signUp] User 엔티티 생성");
         User user = createUser(signUpDto);
 
         LOGGER.info("[signUp] userRepository 저장");
         User savedUser = userRepository.save(user);
 
-        if(savedUser.getName().isEmpty())
+        if (savedUser.getName().isEmpty())
             throw new SignException(HttpStatus.BAD_REQUEST, "DB 저장에 실패했습니다.");
     }
 
@@ -79,7 +81,7 @@ public class SignService {
         LOGGER.info("[signIn] Id : {}", signInDto.getId());
 
         LOGGER.info("[signIn] 패스워드 비교 수행");
-        if(!passwordEncoder.matches(signInDto.getPassword(), user.getPassword()))
+        if (!passwordEncoder.matches(signInDto.getPassword(), user.getPassword()))
             throw new SignException(HttpStatus.BAD_REQUEST, "아이디가 존재하지 않거나 비밀번호가 일치하지 않습니다.");
 
         user.setFcmToken(signInDto.getFcmToken());
@@ -92,11 +94,11 @@ public class SignService {
         return makeToken(user);
     }
 
-    public void signOut(String uid) throws SignException{
+    public void signOut(String uid) throws SignException {
         LOGGER.info("[signOut] 회원 탈퇴 정보 확인");
         Optional<User> optionalUser = userRepository.getByUid(uid);
 
-        if(optionalUser.isEmpty())
+        if (optionalUser.isEmpty())
             throw new SignException(HttpStatus.BAD_REQUEST, "존재하지 않는 아이디입니다.");
 
         User user = optionalUser.get();
@@ -107,7 +109,7 @@ public class SignService {
     public String makeTokenByUid(String uid) throws SignException {
         Optional<User> optionalUser = userRepository.getByUid(uid);
 
-        if(optionalUser.isEmpty())
+        if (optionalUser.isEmpty())
             throw new SignException(HttpStatus.BAD_REQUEST, "존재하지 않는 아이디입니다.");
 
         return makeToken(optionalUser.get());
@@ -122,11 +124,11 @@ public class SignService {
 
     private User createUser(SignUpDto signUpDto) {
         User user = User.builder()
-                        .uid(signUpDto.getId())
-                        .name(signUpDto.getName())
-                        .password(passwordEncoder.encode(signUpDto.getPassword()))
-                        .roles(Collections.singletonList("ROLE_USER"))
-                        .build();
+                .uid(signUpDto.getId())
+                .name(signUpDto.getName())
+                .password(passwordEncoder.encode(signUpDto.getPassword()))
+                .roles(Collections.singletonList("ROLE_USER"))
+                .build();
         return user;
     }
 }
