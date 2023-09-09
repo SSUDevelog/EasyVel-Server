@@ -1,6 +1,6 @@
 package com.easyvel.server.tag.dto;
 
-import com.easyvel.server.tag.Tag;
+import com.easyvel.server.global.entity.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,7 +9,8 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class TagList {

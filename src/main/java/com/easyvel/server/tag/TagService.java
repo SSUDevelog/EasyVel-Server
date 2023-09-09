@@ -2,8 +2,10 @@ package com.easyvel.server.tag;
 
 import com.easyvel.server.global.dto.PostDto;
 import com.easyvel.server.global.dto.VelogUserInfoDto;
-import com.easyvel.server.sign.User;
-import com.easyvel.server.sign.UserRepository;
+import com.easyvel.server.global.entity.Tag;
+import com.easyvel.server.global.entity.User;
+import com.easyvel.server.global.repository.TagRepository;
+import com.easyvel.server.global.repository.UserRepository;
 import com.easyvel.server.subscribe.service.SubscribeService;
 import com.easyvel.server.tag.dto.TagList;
 import lombok.RequiredArgsConstructor;
@@ -60,6 +62,7 @@ public class TagService {
 
     /**
      * 해당 태그와 관련된 포스트를 크롤링해 PostDto를 만듭니다.
+     *
      * @param uid
      * @param tag
      * @return
@@ -72,7 +75,7 @@ public class TagService {
         return createPostDtoList(userSubscribeList, postsElements);
     }
 
-    public List<PostDto> getUserTagPostList(String uid) throws IOException{
+    public List<PostDto> getUserTagPostList(String uid) throws IOException {
         User user = getUserByUid(uid);
         Tag userTag = getUserTag(user);
 
@@ -88,6 +91,7 @@ public class TagService {
 
     /**
      * 현재 가장 인기있는 태그 목록을 가져옵니다.
+     *
      * @param vol 가져올 개수
      * @return
      */
@@ -109,7 +113,7 @@ public class TagService {
 
             try {
                 tags.add(elementTag.text());
-            } catch (RuntimeException e){
+            } catch (RuntimeException e) {
                 throw new IOException("문서 구조가 변경되었습니다.");
             }
             cnt++;
@@ -124,7 +128,7 @@ public class TagService {
             try {
                 PostDto postDto = createPostDto(postElement, userSubscribeList);
                 postDtoList.add(postDto);
-            } catch (Exception e){
+            } catch (Exception e) {
                 throw new IOException("문서 구조가 변경되었습니다.");
             }
         }
