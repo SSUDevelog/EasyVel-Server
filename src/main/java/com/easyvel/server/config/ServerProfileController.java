@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 @RestController
 @RequiredArgsConstructor
-public class ServerProfilecontroller {
+public class ServerProfileController {
     private final Environment env;
 
     @GetMapping("/profile")
