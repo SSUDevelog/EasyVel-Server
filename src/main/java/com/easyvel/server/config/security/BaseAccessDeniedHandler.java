@@ -18,7 +18,6 @@ public class BaseAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException exception) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
         LOGGER.info("[commence] 인가 실패로 response.sendError 발생");
 
         DefaultResponse defaultResponse = new DefaultResponse("권한이 없습니다.");

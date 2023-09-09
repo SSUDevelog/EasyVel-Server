@@ -11,7 +11,6 @@ import com.easyvel.server.sign.dto.SignUpDto;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +25,7 @@ public class SignController {
     private final AppleAuthService appleAuthService;
 
     @EasyvelTokenApiImplicitParams
-    @GetMapping(value = "/token/refresh")
+    @GetMapping("/token/refresh")
     public String refreshToken(@RequestHeader(SecurityConfiguration.TOKEN_HEADER) String token) throws SignException {
         String uid = jwtTokenProvider.getUid(token);
 
@@ -38,7 +37,7 @@ public class SignController {
      * @return token
      * @throws Exception
      */
-    @PostMapping(value = "/apple-login")
+    @PostMapping("/apple-login")
     public String appleLogin(@Validated @RequestBody GetTokensDto getTokensDto) throws Exception {
         LOGGER.info("[apple-login] 애플 로그인을 수행합니다.");
         appleAuthService.checkIdentityToken(getTokensDto.getIdentity_token());
@@ -62,7 +61,7 @@ public class SignController {
         return signIn(signInDto);
     }
 
-    @PostMapping(value = "/sign-up")
+    @PostMapping("/sign-up")
     public void signUp(
             @Validated @RequestBody SignUpDto signUpDto) throws SignException{
         LOGGER.info("[signUp] 회원가입을 수행합니다. id : {}, pw : ****, name : {}, role : {}", signUpDto.getId(), signUpDto.getName());
@@ -76,7 +75,7 @@ public class SignController {
      * @return token
      * @throws SignException
      */
-    @PostMapping(value = "/sign-in")
+    @PostMapping("/sign-in")
     public String signIn(
             @Validated @RequestBody SignInDto signInDto) throws SignException {
         LOGGER.info("[signIn] 로그인을 시도하고 있습니다. id : {}, pw : ****", signInDto.getId());
@@ -90,8 +89,8 @@ public class SignController {
     }
 
     @EasyvelTokenApiImplicitParams
-    @PostMapping(value = "/sign-out")
-    public void signOut(@RequestHeader("X-AUTH-TOKEN") String token) throws SignException {
+    @DeleteMapping(value = "/sign-out")
+    public void signOut(@RequestHeader(SecurityConfiguration.TOKEN_HEADER) String token) throws SignException {
         String uid = jwtTokenProvider.getUid(token);
         LOGGER.info("[signIn] 회원탈퇴를 시도하고 있습니다. id : {}, pw : ****", uid);
 
