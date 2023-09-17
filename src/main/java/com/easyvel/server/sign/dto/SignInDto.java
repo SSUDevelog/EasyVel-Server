@@ -18,8 +18,4 @@ public class SignInDto {
     @ApiParam(value = "Password", required = true)
     @NotBlank
     private String password;
-
-    @ApiParam(value = "FCMToken", required = true)
-    @NotBlank
-    private String fcmToken;
 }

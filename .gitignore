@@ -40,3 +40,6 @@ out/
 **/application.yaml
 **/application.yml
 **/application.properties
+
+### key files ###
+**/resources/private/**
