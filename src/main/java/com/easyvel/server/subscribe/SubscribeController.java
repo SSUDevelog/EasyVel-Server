@@ -70,12 +70,14 @@ public class SubscribeController {
     @EasyvelTokenApiImplicitParams
     @GetMapping("/validate/{name}")
     @ResponseBody
-    public ResponseEntity<ValidateVelogUserDto> validateUser(@PathVariable String name) throws IOException {
+    public ResponseEntity<ValidateVelogUserDto> validateUser(@RequestHeader("X-AUTH-TOKEN") String token, @PathVariable String name) throws IOException {
         // 입력 된 user name이 실제 velog에 존재하는 유저인지 확인하는 GET api입니다.
+
+        String easyVeluserName = jwtTokenProvider.getUid(token);
 
         ValidateVelogUserDto validateVelogUserDto = new ValidateVelogUserDto(name);
         Boolean isPresent = subscribeService.isValidateUser(validateVelogUserDto);
-        subscribeService.getVelogUserProfile(isPresent, validateVelogUserDto);
+        subscribeService.getVelogUserProfile(easyVeluserName, isPresent, validateVelogUserDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(validateVelogUserDto);
     }

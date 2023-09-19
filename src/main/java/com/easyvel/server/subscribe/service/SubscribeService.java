@@ -127,14 +127,21 @@ public class SubscribeService {
         return doSubscribeScrapping(posts, subscriber);
     }
 
-    public ValidateVelogUserDto getVelogUserProfile(Boolean isPresent, ValidateVelogUserDto validateVelogUserDto) throws IOException {
+    public ValidateVelogUserDto getVelogUserProfile(String easyVeluserName, Boolean isPresent, ValidateVelogUserDto validateVelogUserDto) throws IOException {
         // 실제 존재하는 velog 유저라면 프로필 사진 url을 추가하는 함수를 호출하고, 아니라면 바로 리턴합니다.
         if (isPresent == Boolean.FALSE) {
             validateVelogUserDto.setValidate(Boolean.FALSE);
             return validateVelogUserDto;
         }
         validateVelogUserDto.setValidate(Boolean.TRUE);
-        getVelogUserProfilePicture(validateVelogUserDto);
+        getVelogUserProfileInfo(validateVelogUserDto);
+        try {
+            Boolean isFollow = checkFollow(easyVeluserName, validateVelogUserDto.getUserName());
+            validateVelogUserDto.setIsFollow(isFollow);
+        } catch (NullPointerException e) {
+            validateVelogUserDto.setIsFollow(Boolean.FALSE);
+        }
+
         return validateVelogUserDto;
     }
 
@@ -181,6 +188,15 @@ public class SubscribeService {
 
         return checkSubscribeOfTrend(trendposts, uid);
 
+    }
+
+    private Boolean checkFollow(String easyVeluserName, String velogUserName) throws NullPointerException{
+        Optional<User> user = userRepository.getByUid(easyVeluserName);
+        Target target = targetRepository.getByVelogUserName(velogUserName)
+                .orElseThrow(() -> new NullPointerException());
+        Subscribe subscribe = subscribeRepository.getByUserAndTarget(user.get(), target)
+                .orElseThrow(() -> new NullPointerException());
+        return Boolean.TRUE;
     }
 
     private List<PostDto> doTrendPostScrapping(Elements posts, String url) {
@@ -288,18 +304,24 @@ public class SubscribeService {
         return velogUserInfoDtos;
     }
 
-    private void getVelogUserProfilePicture(ValidateVelogUserDto validateVelogUserDto) throws IOException {
-        // velog 유저의 프로필 사진 url을 스크래핑합니다.
+    private void getVelogUserProfileInfo(ValidateVelogUserDto validateVelogUserDto) throws IOException {
+        // velog 유저의 프로필 사진 url과 자기소개 글을 스크래핑합니다.
         Document document = Jsoup.connect(validateVelogUserDto.getProfileURL()).get();
 
         Elements profileImageURL = document.selectXpath("//*[@id=\"root\"]/div[2]/div[3]/div[1]/div[1]/a/img");
         String imgUrl = profileImageURL.attr("src");
+
+        Elements introduceURL = document.selectXpath("//*[@id=\"root\"]/div[2]/div[3]/div[1]/div[1]/div/div[2]");
+        String introUrl = introduceURL.text();
+        System.out.println(introduceURL);
+        System.out.println(introUrl);
 
         if (!imgUrl.contains("https://")) {
             imgUrl = "";
         }
 
         validateVelogUserDto.setProfilePictureURL(imgUrl);
+        validateVelogUserDto.setIntroduce(introUrl);
     }
 
     private void makeSubscribe(User user, String subscriber) {
