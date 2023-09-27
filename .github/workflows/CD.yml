@@ -17,8 +17,8 @@ jobs:
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
             cd ~/EasyVel-Server
-            sudo git pull origin master
-            ./gradlew build -x test
+            sudo git pull origin dev
+            ./gradlew clean build --exclude-task test
             cp ./build/libs/*-SNAPSHOT.jar ~/EasyVelServer/nonstop/jar
             cd ~/EasyVelServer/nonstop
             ./deploy.sh
