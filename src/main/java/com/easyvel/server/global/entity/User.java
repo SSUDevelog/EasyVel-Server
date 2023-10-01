@@ -1,6 +1,8 @@
 package com.easyvel.server.global.entity;
 
+import com.easyvel.server.global.entity.bridge.UserVelogUser;
 import com.easyvel.server.notification.fcm.FcmToken;
+import com.easyvel.server.tag.bridge.UserTag;
 import lombok.*;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.GrantedAuthority;
@@ -21,13 +23,12 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class User implements UserDetails {
 
-    //Todo: 애플인지 구글인지 식별정보 넣기??
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     //Todo: 애플이나 구글의 사용자 정보 넣기
-    @Column(nullable = false, unique = true, name = "uid")
+    @Column(nullable = false, unique = true)
     private String uid;
 
     @Column(nullable = false)
@@ -36,21 +37,18 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String name;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "user_id")
-    private Tag tag;
-
     //영속성 전이. 삭제되면 아래 얘도 삭제 되도록
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Subscribe> subscribes = new ArrayList<>();
+    private List<UserTag> userTagList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Notification> notifications = new ArrayList<>();
+    private List<UserVelogUser> userVelogUsers = new ArrayList<>();
 
     @Nullable
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private FcmToken fcmToken;
 
+    //Todo: roles 시간나면 개선 이거 이렇게 말고 다른거로 바꾸고싶은데...
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> roles = new ArrayList<>();
 

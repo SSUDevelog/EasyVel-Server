@@ -26,7 +26,7 @@ public class NoticeGroup {
     @Column(unique = true)
     private String value;
 
-    @OneToMany(mappedBy = "noticeGroup", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "noticeGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NoticeGroupFcmToken> noticeGroupFcmTokenList = new ArrayList<>();
 
     public NoticeGroup(String value) {

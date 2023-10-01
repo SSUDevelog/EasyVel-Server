@@ -2,12 +2,12 @@ package com.easyvel.server.subscribe.service;
 
 import com.easyvel.server.global.dto.PostDto;
 import com.easyvel.server.global.dto.VelogUserInfoDto;
-import com.easyvel.server.global.entity.Subscribe;
-import com.easyvel.server.global.entity.Target;
+import com.easyvel.server.global.entity.bridge.UserVelogUser;
+import com.easyvel.server.global.entity.VelogUser;
 import com.easyvel.server.global.entity.User;
 import com.easyvel.server.subscribe.dto.*;
-import com.easyvel.server.global.repository.SubscribeRepository;
-import com.easyvel.server.global.repository.TargetRepository;
+import com.easyvel.server.global.repository.UserVelogUserRepository;
+import com.easyvel.server.global.repository.VelogUserRepository;
 import com.easyvel.server.global.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
@@ -28,9 +28,9 @@ import java.util.Optional;
 @Service
 public class SubscribeService {
 
-    private final SubscribeRepository subscribeRepository;
+    private final UserVelogUserRepository userVelogUserRepository;
     private final UserRepository userRepository;
-    private final TargetRepository targetRepository;
+    private final VelogUserRepository velogUserRepository;
     // private final TagRepository tagRepository;
 
 
@@ -144,13 +144,13 @@ public class SubscribeService {
         Optional<User> user = userRepository.getByUid(userName);//밖으로 빼야함.
         User resultUser = user.orElseThrow(() -> new RuntimeException()); // 커스텀 에러로 변경 고려
 
-        Optional<Target> target= targetRepository.getByVelogUserName(targetName);
-        Target resultTarget = target.orElseThrow(() -> new RuntimeException()); // 추후 custom exception 처리
+        Optional<VelogUser> target= velogUserRepository.getByName(targetName);
+        VelogUser resultVelogUser = target.orElseThrow(() -> new RuntimeException()); // 추후 custom exception 처리
 
-        Optional<Subscribe> subscribe = subscribeRepository.getByUserAndTarget(resultUser, resultTarget);
-        Subscribe resultSubscribe = subscribe.orElseThrow(() -> new RuntimeException()); // 추후 custom exception 처리
+        Optional<UserVelogUser> subscribe = userVelogUserRepository.getByUserAndVelogUser(resultUser, resultVelogUser);
+        UserVelogUser resultUserVelogUser = subscribe.orElseThrow(() -> new RuntimeException()); // 추후 custom exception 처리
 
-        subscribeRepository.delete(resultSubscribe);
+        userVelogUserRepository.delete(resultUserVelogUser);
         unsubscribeDto.setSuccess(Boolean.TRUE);
         unsubscribeDto.setMsg("구독을 취소했습니다.");
         return unsubscribeDto;
@@ -158,11 +158,11 @@ public class SubscribeService {
 
     public void validateTarget(String targetName) {
         // 구독 삭제가 일어남으로써, 아무도 해당 Velog 유저를 구독하지 않는다면 그 Velog 유저의 정보를 삭제합니다.
-        Optional<Target> target= targetRepository.getByVelogUserName(targetName);
-        Target result = target.orElseThrow(() -> new RuntimeException());
+        Optional<VelogUser> target= velogUserRepository.getByName(targetName);
+        VelogUser result = target.orElseThrow(() -> new RuntimeException());
 
-        if (result.getSubscribes().isEmpty()) {
-            targetRepository.delete(result);
+        if (result.getUserVelogUsers().isEmpty()) {
+            velogUserRepository.delete(result);
         }
     }
 
@@ -266,12 +266,12 @@ public class SubscribeService {
     private List<VelogUserInfoDto> getSubscribers(User user) throws IOException {
         // 유저가 구독중인 velog 유저들의 이름과 프로필 url을 리턴합니다.
 
-        List<Subscribe> subscribes = user.getSubscribes();
+        List<UserVelogUser> userVelogUsers = user.getUserVelogUsers();
         List<VelogUserInfoDto> velogUserInfoDtos = new ArrayList<>();
 
-        for (Subscribe subscribe : subscribes) {
+        for (UserVelogUser userVelogUser : userVelogUsers) {
             VelogUserInfoDto velogUserInfoDto = new VelogUserInfoDto();
-            velogUserInfoDto.setName(subscribe.getTarget().getVelogUserName());
+            velogUserInfoDto.setName(userVelogUser.getVelogUser().getName());
             String url = "https://velog.io/@" + velogUserInfoDto.getName();
             Document document = Jsoup.connect(url).get();
             Elements profileImageURL = document.selectXpath("//*[@id=\"root\"]/div[2]/div[3]/div[1]/div[1]/a/img");
@@ -304,26 +304,26 @@ public class SubscribeService {
 
     private void makeSubscribe(User user, String subscriber) {
         // velog 유저 이름으로 target을 찾고, DB에 subscribe를 기록하는 함수를 호출합니다.
-        Optional<Target> target = targetRepository.getByVelogUserName(subscriber);
-        Target result = target.orElseGet(() -> makeNewTarget(subscriber));
+        Optional<VelogUser> target = velogUserRepository.getByName(subscriber);
+        VelogUser result = target.orElseGet(() -> makeNewTarget(subscriber));
 
         writeSubscribeTable(user, result);
     }
 
-    private Target makeNewTarget(String subscriber) {
-        Target target = new Target();
-        target.setVelogUserName(subscriber);
-        targetRepository.save(target);
-        return target;
+    private VelogUser makeNewTarget(String subscriber) {
+        VelogUser velogUser = new VelogUser();
+        velogUser.setName(subscriber);
+        velogUserRepository.save(velogUser);
+        return velogUser;
     }
 
-    private void writeSubscribeTable(User user, Target target) {
+    private void writeSubscribeTable(User user, VelogUser velogUser) {
         // DB에 구독 관계를 기록합니다.
-        Subscribe subscribe = new Subscribe();
+        UserVelogUser userVelogUser = new UserVelogUser();
 
-        subscribe.setUser(user);
-        subscribe.setTarget(target);
-        subscribeRepository.save(subscribe);
+        userVelogUser.setUser(user);
+        userVelogUser.setVelogUser(velogUser);
+        userVelogUserRepository.save(userVelogUser);
     }
 
     private int openURL(String profileURL) throws IOException {

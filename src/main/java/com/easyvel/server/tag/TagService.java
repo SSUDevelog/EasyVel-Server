@@ -2,11 +2,12 @@ package com.easyvel.server.tag;
 
 import com.easyvel.server.global.dto.PostDto;
 import com.easyvel.server.global.dto.VelogUserInfoDto;
-import com.easyvel.server.global.entity.Tag;
 import com.easyvel.server.global.entity.User;
 import com.easyvel.server.global.repository.TagRepository;
 import com.easyvel.server.global.repository.UserRepository;
 import com.easyvel.server.subscribe.service.SubscribeService;
+import com.easyvel.server.tag.bridge.UserTag;
+import com.easyvel.server.tag.bridge.UserTagRepository;
 import com.easyvel.server.tag.dto.TagList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,35 +30,34 @@ public class TagService {
 
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
+    private final UserTagRepository userTagRepository;
     private final SubscribeService subscribeService;
 
     public TagList getUserTagList(String uid) {
         User user = getUserByUid(uid);
-        Tag userTag = getUserTag(user);
 
-        return TagList.make(userTag);
+        return TagList.make(user);
     }
 
-    public void addTag(String uid, String tag) {
+    public void addTag(String uid, String tagName) {
         User user = getUserByUid(uid);
-        Tag userTag = getUserTag(user);
+        Tag tag = getElseMakeTag(tagName);
 
-        if (containsTag(userTag, tag))
+        if (containsTag(user, tag))
             throw new IllegalArgumentException("이미 추가한 태그입니다.");
 
-        userTag.getTags().add(tag);
-        tagRepository.save(userTag);
+        UserTag userTag = new UserTag(user, tag);
+        userTagRepository.save(userTag);
     }
 
-    public void deleteTag(String uid, String tag) {
+    public void deleteTag(String uid, String tagName) {
         User user = getUserByUid(uid);
-        Tag userTag = getUserTag(user);
+        Tag tag = getElseMakeTag(tagName);
 
-        if (!containsTag(userTag, tag))
-            throw new IllegalArgumentException("목록에 " + tag + "가 없습니다.");
+        UserTag userTag = userTagRepository.findByUserAndTag(user, tag)
+                .orElseThrow(() -> new IllegalArgumentException("목록에 " + tagName + "가 없습니다."));
 
-        userTag.getTags().remove(tag);
-        tagRepository.save(userTag);
+        userTagRepository.delete(userTag);
     }
 
     /**
@@ -76,11 +76,10 @@ public class TagService {
     }
 
     public List<PostDto> getUserTagPostList(String uid) throws IOException {
-        User user = getUserByUid(uid);
-        Tag userTag = getUserTag(user);
+        TagList tagList = getUserTagList(uid);
 
         List<PostDto> postDtoList = new ArrayList<>();
-        for (String tag : userTag.getTags()) {
+        for (String tag : tagList.getTags()) {
             List<PostDto> postDtoListByTag = getPostDtoListByTag(uid, tag);
             postDtoList.addAll(postDtoListByTag);
         }
@@ -178,13 +177,23 @@ public class TagService {
         return postDto;
     }
 
-    private boolean containsTag(Tag source, String tag) {
-        return source.getTags().contains(tag);
+    private boolean containsTag(User user, Tag tag) {
+        return userTagRepository.findByUserAndTag(user, tag).isPresent();
     }
 
-    private Tag getUserTag(User user) {
-        return tagRepository.findByUser(user)
-                .orElseThrow(() -> new NullPointerException("user의 Tag 데이터가 NULL 입니다."));
+    private Tag getElseMakeTag(String tagValue) {
+        Tag tag = tagRepository.findByValue(tagValue)
+                .orElseGet(() -> makeTag(tagValue));
+
+        return tag;
+    }
+
+    private Tag makeTag(String value) {
+        tagRepository.findByValue(value)
+                .ifPresent(m -> new IllegalArgumentException("이미 존재하는 tag 입니다."));
+
+        Tag tag = new Tag(value);
+        return tagRepository.save(tag);
     }
 
     private User getUserByUid(String uid) {
