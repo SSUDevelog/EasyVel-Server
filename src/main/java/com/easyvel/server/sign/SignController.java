@@ -56,8 +56,7 @@ public class SignController {
         }
 
         LOGGER.info("[apple-login] 로그인 진행");
-        //Todo: 임시로 fcm 값을 넣었음
-        SignInDto signInDto = new SignInDto(uid, password, "fcmToken");
+        SignInDto signInDto = new SignInDto(uid, password);
         return signIn(signInDto);
     }
 

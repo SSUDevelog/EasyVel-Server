@@ -84,13 +84,6 @@ public class SignService {
         if (!passwordEncoder.matches(signInDto.getPassword(), user.getPassword()))
             throw new SignException(HttpStatus.BAD_REQUEST, "아이디가 존재하지 않거나 비밀번호가 일치하지 않습니다.");
 
-        user.setFcmToken(signInDto.getFcmToken());
-
-        LOGGER.info("[signIn] fcmToken 저장");
-        User savedUser = userRepository.save(user);
-        if (!savedUser.getFcmToken().equals(signInDto.getFcmToken()))
-            throw new SignException(HttpStatus.INTERNAL_SERVER_ERROR, "fcmToken 저장에 실패했습니다.");
-
         return makeToken(user);
     }
 
