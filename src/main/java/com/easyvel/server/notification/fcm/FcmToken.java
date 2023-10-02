@@ -30,7 +30,7 @@ public class FcmToken {
     @OneToOne
     private User user;
 
-    @OneToMany(mappedBy = "fcmToken", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "fcmToken", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NoticeGroupFcmToken> noticeGroupFcmTokenList = new ArrayList<>();
 
     public FcmToken(String value, User user) {
