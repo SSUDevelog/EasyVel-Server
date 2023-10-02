@@ -10,6 +10,8 @@ public class ValidateVelogUserDto {
     private String userName;
     private String profilePictureURL;
     private String profileURL;
+    private String introduce;
+    private Boolean isFollow;
 
     public ValidateVelogUserDto(String userName) {
         this.userName = userName;
