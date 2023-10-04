@@ -191,12 +191,13 @@ public class SubscribeService {
     }
 
     private Boolean checkFollow(String easyVeluserName, String velogUserName) throws NullPointerException{
-        Optional<User> user = userRepository.getByUid(easyVeluserName);
-        Target target = targetRepository.getByVelogUserName(velogUserName)
-                .orElseThrow(() -> new NullPointerException());
-        Subscribe subscribe = subscribeRepository.getByUserAndTarget(user.get(), target)
-                .orElseThrow(() -> new NullPointerException());
-        return Boolean.TRUE;
+        User user = userRepository.getByUid(easyVeluserName)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 uid 입니다."));
+        VelogUser velogUser = velogUserRepository.getByName(velogUserName)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 벨로그 유저입니다."));
+
+        Optional<UserVelogUser> byUserAndVelogUser = userVelogUserRepository.getByUserAndVelogUser(user, velogUser);
+        return byUserAndVelogUser.isPresent();
     }
 
     private List<PostDto> doTrendPostScrapping(Elements posts, String url) {
