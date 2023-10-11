@@ -52,9 +52,9 @@ public class TagController {
     }
 
     //Todo: 페이징 필요
-    @ApiOperation("유저 태그 목록 연관 포스트")
+    @ApiOperation("유저가 추가한 태그에 관련된 포스트")
     @EasyvelTokenApiImplicitParams
-    @GetMapping("/posts-1")
+    @GetMapping("/user-tag-posts")
     public List<PostDto> getUserTagPostList(@RequestHeader(SecurityConfiguration.TOKEN_HEADER) String token) throws IOException {
         String uid = jwtTokenProvider.getUid(token);
 
@@ -64,7 +64,7 @@ public class TagController {
     //Todo: 페이징 필요
     @ApiOperation(value = "태그 연관 포스트", notes = "search 파라미터에 검색할 태그를 입력")
     @EasyvelTokenApiImplicitParams
-    @GetMapping("/posts-2")
+    @GetMapping("/search-posts")
     public List<PostDto> getUserTagPostList(@RequestParam String search,
                                             @RequestHeader(SecurityConfiguration.TOKEN_HEADER) String token) throws IOException {
         String uid = jwtTokenProvider.getUid(token);
