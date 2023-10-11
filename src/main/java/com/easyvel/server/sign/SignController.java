@@ -8,9 +8,12 @@ import com.easyvel.server.sign.apple.AppleAuthService;
 import com.easyvel.server.sign.apple.dto.GetTokensDto;
 import com.easyvel.server.sign.dto.SignInDto;
 import com.easyvel.server.sign.dto.SignUpDto;
+import com.easyvel.server.sign.google.dto.*;
+import com.easyvel.server.sign.google.GoogleAuthService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +26,7 @@ public class SignController {
     private final SignService signService;
     private final JwtTokenProvider jwtTokenProvider;
     private final AppleAuthService appleAuthService;
+    private final GoogleAuthService googleAuthService;
 
     @EasyvelTokenApiImplicitParams
     @GetMapping("/token/refresh")
@@ -57,6 +61,26 @@ public class SignController {
 
         LOGGER.info("[apple-login] 로그인 진행");
         SignInDto signInDto = new SignInDto(uid, password);
+        return signIn(signInDto);
+    }
+
+    @PostMapping(value = "/google-login")
+    public String googleLogin(@RequestParam("code") String code) throws Exception {
+        GetGoogleTokenResponse getGoogleTokenResponse = googleAuthService.getTokensResponse(code);
+        String uid = signService.getGoogleID(getGoogleTokenResponse.getTokenResponse().getId_token());
+        String password = "password";
+
+        if (!signService.checkRegisteredByUid(uid)) {
+            SignUpDto signUpDto = new SignUpDto(uid, password, "new user");
+            try {
+                signService.signUp(signUpDto);
+            } catch (Exception e) {
+                throw new SignException(HttpStatus.BAD_REQUEST, "오류가 발생했습니다.");
+            }
+        }
+
+        SignInDto signInDto = new SignInDto(uid, password);
+
         return signIn(signInDto);
     }
 
