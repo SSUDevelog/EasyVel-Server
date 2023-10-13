@@ -24,7 +24,7 @@ public class TagController {
 
     @ApiOperation("유저 태그 목록")
     @EasyvelTokenApiImplicitParams
-    @GetMapping("/gettag")
+    @GetMapping("/get")
     public TagList getUserTagList(@RequestHeader(SecurityConfiguration.TOKEN_HEADER) String token) {
         String uid = jwtTokenProvider.getUid(token);
 
@@ -33,7 +33,7 @@ public class TagController {
 
     @ApiOperation("유저 태그 추가")
     @EasyvelTokenApiImplicitParams
-    @PostMapping("addtag")
+    @PostMapping("add")
     public void addUserTag(@RequestBody String tag,
             @RequestHeader(SecurityConfiguration.TOKEN_HEADER) String token) {
         String uid = jwtTokenProvider.getUid(token);
@@ -43,7 +43,7 @@ public class TagController {
 
     @ApiOperation("유저 태그 제거")
     @EasyvelTokenApiImplicitParams
-    @DeleteMapping("deletetag")
+    @DeleteMapping("delete")
     public void deleteUserTag(@RequestBody String tag,
                               @RequestHeader(SecurityConfiguration.TOKEN_HEADER) String token) {
         String uid = jwtTokenProvider.getUid(token);
@@ -73,7 +73,7 @@ public class TagController {
     }
 
     @ApiOperation(value = "현재 인기있는 태그 목록", notes = "vol 파라미터에 받을 태그 수량을 입력")
-    @GetMapping("/hot")
+    @GetMapping("/hot-tag")
     public TagList getHotTagList(@RequestParam(defaultValue = "10") int vol) throws IOException {
         return tagService.getHotTagList(vol);
     }
