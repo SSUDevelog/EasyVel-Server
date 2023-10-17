@@ -43,17 +43,23 @@ public class SubscribeController {
 
     @EasyvelTokenApiImplicitParams
     @PostMapping(value = "/addsubscriber")
-    public ResponseEntity<String> addSubscriber(@RequestHeader("X-AUTH-TOKEN") String token, @RequestParam String name, @RequestParam String fcmToken) throws IOException {
+    public ResponseEntity<String> addSubscriber(@RequestHeader("X-AUTH-TOKEN") String token, @RequestParam String name) throws IOException {
         // 유저의 구독자를 추가하는 POST api 입니다.
         // throw에 SubscribeException 추가해야 합니다.
 
         String userName = jwtTokenProvider.getUid(token);
+        ValidateVelogUserDto validateVelogUserDto = new ValidateVelogUserDto(name);
+        Boolean isPresent = subscribeService.isValidateUser(validateVelogUserDto);
+
+        String result = "Fail";
+        if (isPresent) {
+            result = subscribeService.addSubscribe(userName, name);
+        }
 
         //JoinGroupDto joinGroupDto = new JoinGroupDto(userName, name); 알림 관련 구현체 없어서 임시 주석 처리
-        subscribeService.addSubscribe(userName, name);
         //notificationService.joinGroup(joinGroupDto); 알림 관련 구현체 없어서 임시 주석 처리
 
-        return ResponseEntity.status(HttpStatus.OK).body("Success");//임시
+        return ResponseEntity.status(HttpStatus.OK).body(result);//임시
     }
 
     @EasyvelTokenApiImplicitParams
