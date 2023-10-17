@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -43,11 +44,20 @@ public class TagService {
         User user = getUserByUid(uid);
         Tag tag = getElseMakeTag(tagName);
 
+        checkBlankAndSpecial(tagName);
+
         if (containsTag(user, tag))
             throw new IllegalArgumentException("이미 추가한 태그입니다.");
 
         UserTag userTag = new UserTag(user, tag);
         userTagRepository.save(userTag);
+    }
+
+    //Todo: 다른 곳에서도 필요할지도..? 이후 추가 적용하기
+    private void checkBlankAndSpecial(String tagName) {
+        String pattern = "^[0-9|a-z|A-Z|ㄱ-ㅎ|ㅏ-ㅣ|가-힣]*$";
+        if (!Pattern.matches(pattern, tagName))
+            throw new IllegalArgumentException("공백, 특수문자는 허용되지 않습니다.");
     }
 
     public void deleteTag(String uid, String tagName) {
@@ -69,6 +79,7 @@ public class TagService {
      * @throws IOException
      */
     public List<PostDto> getPostDtoListByTag(String uid, String tag) throws IOException {
+        //Todo: 없는 태그를 긁어오려할 경우 체크하는 로직 만들기
         List<String> userSubscribeList = getSubscribeNameList(uid);
         Elements postsElements = getTagPostsElements(tag);
 
