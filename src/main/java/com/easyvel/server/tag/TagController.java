@@ -72,6 +72,7 @@ public class TagController {
     }
 
     @ApiOperation(value = "현재 인기있는 태그 목록", notes = "vol 파라미터에 받을 태그 수량을 입력")
+    @EasyvelTokenApiImplicitParams
     @GetMapping("/hot-tag")
     public TagList getHotTagList(@RequestParam(defaultValue = "10") int vol) throws IOException {
         return tagService.getHotTagList(vol);
