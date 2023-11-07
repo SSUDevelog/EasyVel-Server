@@ -85,7 +85,7 @@ public class SubscribeService {
     }
 
     //반환형 나중에 성공여부 DTO로 바꾸기
-    public void addSubscribe(String uid, String subscriber) throws IOException {
+    public String addSubscribe(String uid, String subscriber) throws IOException {
         // 구독관계 추가를 위해 user와 target의 이름을 맵핑하는 객체를 생성합니다.
         // throws에 SubscribeException 추가해야 합니다.
 
@@ -105,6 +105,8 @@ public class SubscribeService {
 //        }
 
         makeSubscribe(resultUser, subscriber);
+
+        return "Success";
     }
 
     //
@@ -131,14 +133,16 @@ public class SubscribeService {
         // 실제 존재하는 velog 유저라면 프로필 사진 url을 추가하는 함수를 호출하고, 아니라면 바로 리턴합니다.
         if (isPresent == Boolean.FALSE) {
             validateVelogUserDto.setValidate(Boolean.FALSE);
+            validateVelogUserDto.setProfileURL(null);
             return validateVelogUserDto;
         }
         validateVelogUserDto.setValidate(Boolean.TRUE);
         getVelogUserProfileInfo(validateVelogUserDto);
+
         try {
             Boolean isFollow = checkFollow(easyVeluserName, validateVelogUserDto.getUserName());
             validateVelogUserDto.setIsFollow(isFollow);
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             validateVelogUserDto.setIsFollow(Boolean.FALSE);
         }
 

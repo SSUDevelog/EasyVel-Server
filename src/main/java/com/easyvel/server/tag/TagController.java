@@ -37,7 +37,6 @@ public class TagController {
     public void addUserTag(@RequestBody String tag,
             @RequestHeader(SecurityConfiguration.TOKEN_HEADER) String token) {
         String uid = jwtTokenProvider.getUid(token);
-
         tagService.addTag(uid, tag);
     }
 
