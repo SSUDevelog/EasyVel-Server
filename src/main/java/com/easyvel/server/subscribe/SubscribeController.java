@@ -95,13 +95,13 @@ public class SubscribeController {
 
     @GetMapping("/trendposts")
     @ResponseBody
-    public ResponseEntity<TrendResultDto> trendPosts(@RequestHeader("X-AUTH-TOKEN") String token) throws IOException {
+    public ResponseEntity<TrendResultDto> trendPosts(@RequestHeader("X-AUTH-TOKEN") String token, @RequestParam int limit, @RequestParam int offset) throws IOException {
         // Velog 메인에서 제공하는 실시간 트렌드 포스트들을 리턴합니다.
         // throw에 SubscribeException 추가해야 합니다.
 
         String userName = jwtTokenProvider.getUid(token);
         try {
-            TrendResultDto trendResultDto = subscribeService.collectTrendPost(userName);
+            TrendResultDto trendResultDto = subscribeService.collectTrendPost(userName, limit, offset);
             return ResponseEntity.status(HttpStatus.OK).body(trendResultDto);
         } catch (IOException e) {
             throw new IOException(e);

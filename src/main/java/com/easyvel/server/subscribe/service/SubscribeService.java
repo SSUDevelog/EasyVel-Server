@@ -9,6 +9,7 @@ import com.easyvel.server.subscribe.dto.*;
 import com.easyvel.server.global.repository.UserVelogUserRepository;
 import com.easyvel.server.global.repository.VelogUserRepository;
 import com.easyvel.server.global.repository.UserRepository;
+import com.easyvel.server.velogapi.VelogClient;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -28,6 +29,7 @@ import java.util.Optional;
 @Service
 public class SubscribeService {
 
+    private final VelogClient velogClient;
     private final UserVelogUserRepository userVelogUserRepository;
     private final UserRepository userRepository;
     private final VelogUserRepository velogUserRepository;
@@ -174,17 +176,10 @@ public class SubscribeService {
     }
 
 
-    public TrendResultDto collectTrendPost(String uid) throws IOException {
-        // 트렌드 포스트의 정보들을 스크래핑하여 저장합니다.
+    public TrendResultDto collectTrendPost(String uid, int limit, int offset) throws IOException {
         // throws에 SubscribeException 추가해야 합니다.
 
-        String url = "https://velog.io";
-
-        Document doc = Jsoup.connect(url).get();
-
-        Elements posts = doc.select("#root > div > div > div > main > div > div");
-
-        List<PostDto> trendposts = doTrendPostScrapping(posts, url);
+        List<PostDto> trendposts = velogClient.getTrendData(limit, offset);
 
         return checkSubscribeOfTrend(trendposts, uid);
 
@@ -199,7 +194,7 @@ public class SubscribeService {
         Optional<UserVelogUser> byUserAndVelogUser = userVelogUserRepository.getByUserAndVelogUser(user, velogUser);
         return byUserAndVelogUser.isPresent();
     }
-
+/*
     private List<PostDto> doTrendPostScrapping(Elements posts, String url) {
 
         List<PostDto> trendposts = new ArrayList<>();
@@ -220,6 +215,7 @@ public class SubscribeService {
 
         return trendposts;
     }
+ */
 
     private TrendResultDto checkSubscribeOfTrend(List<PostDto> trendposts, String uid) throws IOException {
 
@@ -228,6 +224,7 @@ public class SubscribeService {
         List<VelogUserInfoDto> subscribers = getSubscribers(uid);
         List<String> subNames = new ArrayList<>();
 
+        trendResultDto.setTrendPostDtos(trendposts);
         if (subscribers == null) {
             return trendResultDto;
         }
@@ -252,7 +249,7 @@ public class SubscribeService {
                 postDto.setName(subscriber);
                 postDto.setTitle(post.select("a h2").text());
                 postDto.setSummary(post.select("p").text());
-                postDto.setDate(post.select(".subinfo span").get(0).text());
+//                postDto.setDate(post.select(".subinfo span").get(0).text());
                 postDto.setComment(Integer.parseInt(post.select(".subinfo span").get(1).text().replace("개의 댓글", "")));
                 postDto.setLike(Integer.parseInt(post.select(".subinfo span").get(2).text()));
                 postDto.setImg(post.select("a div img").attr("src"));

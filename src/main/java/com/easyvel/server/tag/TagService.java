@@ -171,7 +171,7 @@ public class TagService {
                 .name(post.select(".user-info .username a").text())
                 .title(post.select("a h2").text())
                 .summary(post.select("p").text())
-                .date(post.select(".subinfo span").get(0).text())
+//                .date(post.select(".subinfo span").get(0).text())
                 .comment(Integer.parseInt(post.select(".subinfo span").get(1).text().replace("개의 댓글", "")))
                 .like(Integer.parseInt(post.select(".subinfo span").get(2).text()))
                 .img(post.select("a div img").attr("src"))

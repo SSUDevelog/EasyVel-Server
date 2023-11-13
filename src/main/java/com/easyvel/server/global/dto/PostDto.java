@@ -17,7 +17,7 @@ public class PostDto {
     String name;
     String title;
     String summary;
-    String date;
+    Date date;
     int comment;
     int like;
     String img;
@@ -28,6 +28,9 @@ public class PostDto {
     public static Comparator<PostDto> compareByDate = new Comparator<PostDto>() {
         @Override
         public int compare(PostDto o1, PostDto o2) {
+            return o1.date.compareTo(o2.date);
+            // Comment: 정렬 테스트 중
+            /*
             try {
                 System.out.println("compareDate: " + o1 + o2);
                 if (o1.getDate().contains("방금 전") || o2.getDate().contains("방금 전")) {
@@ -73,6 +76,7 @@ public class PostDto {
                 System.out.println("RuntimeExeption: compareDate: " + o1 + o2);
             }
             return 0;
+             */
         }
     };
 }
