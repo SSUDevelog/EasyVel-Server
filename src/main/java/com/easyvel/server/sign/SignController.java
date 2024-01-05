@@ -64,7 +64,7 @@ public class SignController {
         return signIn(signInDto);
     }
 
-    @PostMapping(value = "/google-login")
+    @GetMapping(value = "/google-login")
     public String googleLogin(@RequestParam("code") String code) throws Exception {
         GetGoogleTokenResponse getGoogleTokenResponse = googleAuthService.getTokensResponse(code);
         String uid = signService.getGoogleID(getGoogleTokenResponse.getTokenResponse().getId_token());
