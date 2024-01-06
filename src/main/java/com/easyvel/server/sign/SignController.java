@@ -86,7 +86,7 @@ public class SignController {
 
     @PostMapping("/sign-up")
     public void signUp(
-            @Validated @RequestBody SignUpDto signUpDto) throws SignException{
+            @Validated @RequestBody SignUpDto signUpDto) throws SignException {
         LOGGER.info("[signUp] 회원가입을 수행합니다. id : {}, pw : ****, name : {}, role : {}", signUpDto.getId(), signUpDto.getName());
         signService.signUp(signUpDto);
 
