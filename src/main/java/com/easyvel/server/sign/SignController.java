@@ -3,6 +3,7 @@ package com.easyvel.server.sign;
 import com.easyvel.server.annotation.EasyvelTokenApiImplicitParams;
 import com.easyvel.server.config.security.SecurityConfiguration;
 import com.easyvel.server.exception.SignException;
+import com.easyvel.server.global.dto.BaseResponse;
 import com.easyvel.server.jwt.JwtTokenProvider;
 import com.easyvel.server.sign.apple.AppleAuthService;
 import com.easyvel.server.sign.apple.dto.GetTokensDto;
@@ -42,7 +43,7 @@ public class SignController {
      * @throws Exception
      */
     @PostMapping("/apple-login")
-    public String appleLogin(@Validated @RequestBody GetTokensDto getTokensDto) throws Exception {
+    public BaseResponse<String> appleLogin(@Validated @RequestBody GetTokensDto getTokensDto) throws Exception {
         LOGGER.info("[apple-login] 애플 로그인을 수행합니다.");
         appleAuthService.checkIdentityToken(getTokensDto.getIdentity_token());
         LOGGER.info("[apple-login] identityToken 검정 완료");
@@ -65,7 +66,7 @@ public class SignController {
     }
 
     @GetMapping(value = "/google-login")
-    public String googleLogin(@RequestParam("code") String code) throws Exception {
+    public BaseResponse<String> googleLogin(@RequestParam("code") String code) throws Exception {
         GetGoogleTokenResponse getGoogleTokenResponse = googleAuthService.getTokensResponse(code);
         String uid = signService.getGoogleID(getGoogleTokenResponse.getTokenResponse().getId_token());
         String password = "password";
@@ -99,7 +100,7 @@ public class SignController {
      * @throws SignException
      */
     @PostMapping("/sign-in")
-    public String signIn(
+    public BaseResponse<String> signIn(
             @Validated @RequestBody SignInDto signInDto) throws SignException {
         LOGGER.info("[signIn] 로그인을 시도하고 있습니다. id : {}, pw : ****", signInDto.getId());
         String token = signService.signIn(signInDto);
@@ -108,7 +109,7 @@ public class SignController {
         JoinGroupDto joinGroupDto = new JoinGroupDto(signInDto.getId(), "AllGroup");
         notificationService.joinGroup(joinGroupDto);//로그아웃할때는 제거하는 기능 추가하기
          */
-        return token;
+        return BaseResponse.success("ok", token);
     }
 
     @EasyvelTokenApiImplicitParams

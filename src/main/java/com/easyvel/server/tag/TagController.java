@@ -34,7 +34,7 @@ public class TagController {
     @ApiOperation("유저 태그 추가")
     @EasyvelTokenApiImplicitParams
     @PostMapping("add")
-    public void addUserTag(@RequestBody String tag,
+    public void addUserTag(@RequestParam String tag,
             @RequestHeader(SecurityConfiguration.TOKEN_HEADER) String token) {
         String uid = jwtTokenProvider.getUid(token);
         tagService.addTag(uid, tag);
