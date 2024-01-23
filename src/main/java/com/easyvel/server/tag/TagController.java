@@ -43,7 +43,7 @@ public class TagController {
     @ApiOperation("유저 태그 제거")
     @EasyvelTokenApiImplicitParams
     @DeleteMapping("delete")
-    public void deleteUserTag(@RequestBody String tag,
+    public void deleteUserTag(@RequestParam String tag,
                               @RequestHeader(SecurityConfiguration.TOKEN_HEADER) String token) {
         String uid = jwtTokenProvider.getUid(token);
 

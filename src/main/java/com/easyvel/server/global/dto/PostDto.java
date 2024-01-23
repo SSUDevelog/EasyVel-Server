@@ -21,7 +21,10 @@ public class PostDto {
     int comment;
     int like;
     String img;
+
+    @Builder.Default
     List<String> tag = new ArrayList<>();
+
     String url;
     boolean subscribed;
 
