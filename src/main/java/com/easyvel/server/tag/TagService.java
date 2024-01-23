@@ -95,7 +95,9 @@ public class TagService {
             List<PostDto> postDtoListByTag = getPostDtoListByTag(uid, tag);
             postDtoList.addAll(postDtoListByTag);
         }
-        postDtoList.sort(PostDto.compareByDate);
+        
+        // TODO: 날짜 DATE로 바꾸는 알고리즘 만들기
+//        postDtoList.sort(PostDto.compareByDate);
 
         return postDtoList;
     }
@@ -135,6 +137,7 @@ public class TagService {
 
     private List<PostDto> createPostDtoList(List<String> userSubscribeList, Elements postsElements) throws IOException {
         List<PostDto> postDtoList = new ArrayList<>();
+
         for (Element postElement : postsElements) {
             try {
                 PostDto postDto = createPostDto(postElement, userSubscribeList);
@@ -163,7 +166,7 @@ public class TagService {
         String tagUrl = "https://velog.io/tags/" + tag;
         Document doc = Jsoup.connect(tagUrl).get();
 
-        return doc.select("#root > div > main > div > div").get(1).select("> div");
+        return doc.selectXpath("//*[@id=\"root\"]/div[2]/main/div/div[2]");
     }
 
     //Todo: 전체 적용이 가능한지 알아보기
@@ -179,7 +182,7 @@ public class TagService {
                 .url("https://velog.io" + post.select("> a").attr("href"))
                 .build();
 
-        Elements tags = post.select(".tags-wrapper a");
+        Elements tags = post.selectXpath("div[1]/div[2]/a");
         for (Element _tag : tags) {
             postDto.getTag().add(_tag.text());
         }
